@@ -58,14 +58,14 @@ x = making_info_response(private_token.TOKEN)
 
 print(y.city)
 print(y.sex)
-print(y.birth_day)
+print(y.birth_date)
 print(y.relation)
 
 
 y.set_options_from_profile()
 print(y.city)
 print(y.sex)
-print(y.birth_day)
+print(y.birth_date)
 print(y.relation)
 
 
