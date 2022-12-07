@@ -37,3 +37,4 @@ class SearchUsersOptions:
         self.sex = result_response.json()['response']['sex']
         self.city = result_response.json()['response']['city']
         self.relation = result_response.json()['response']['relation']
+
