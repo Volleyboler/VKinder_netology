@@ -1,21 +1,3 @@
-# from random import randrange
-#
-# import vk
-# from vk.longpoll import VkLongPoll, VkEventType
-#
-# token = input('Token: ')
-#
-# vk.session.search()
-#
-# vk = vk.VkApi(token=token)
-# longpoll = VkLongPoll(vk)
-#
-#
-#
-# def write_msg(user_id, message):
-#     vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
-#
-#
 # for event in longpoll.listen():
 #     if event.type == VkEventType.MESSAGE_NEW:
 #
@@ -31,6 +13,7 @@
 
 
 import requests
+import random
 
 import private_token
 import user_settings
@@ -52,6 +35,22 @@ def making_info_response(token):
     return info_resp
 
 
+def write_msg(token, user_id, message='empty message', attachments=''):
+#     vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
+    info_resp = requests.get(
+    'https://api.vk.com/method/messages.send',
+    params={
+        'random_id': random.randrange(10 ** 7),
+        'access_token': token,
+        'v': 5.131,
+        'user_id': user_id,
+        'message': message,
+        'attachments': attachments,
+        'group_id': 17668361
+     }
+    )
+    return info_resp
+
 y = user_settings.SearchUsersOptions(private_token.TOKEN)
 
 x = making_info_response(private_token.TOKEN)
@@ -67,7 +66,9 @@ print(y.city)
 print(y.sex)
 print(y.birth_date)
 print(y.relation)
-
+print(y.id)
 
 print(x.json())
+
+write_msg(private_token.TOKEN_APP, y.id)
 
