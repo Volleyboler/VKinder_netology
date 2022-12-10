@@ -51,6 +51,10 @@ def write_msg(token, user_id, message='empty message', attachments=''):
     )
     return info_resp
 
+# messages.allowMessagesFromGroup
+
+
+
 y = user_settings.SearchUsersOptions(private_token.TOKEN)
 
 x = making_info_response(private_token.TOKEN)
@@ -70,5 +74,12 @@ print(y.id)
 
 print(x.json())
 
+birth_year = y.birth_date.split('.')[2]
+age_from = 2022 - int(birth_year) - 2
+print(f'age_from = {age_from}')
+age_to = 2022 - int(birth_year) + 2
+print(f'age_to = {age_to}')
+
 write_msg(private_token.TOKEN_APP, y.id)
 
+print(users_search.get_search_results(private_token.TOKEN, age_from, age_to, 1, y.city['id'], y.relation).json())
