@@ -80,6 +80,13 @@ print(f'age_from = {age_from}')
 age_to = 2022 - int(birth_year) + 2
 print(f'age_to = {age_to}')
 
+
 write_msg(private_token.TOKEN_APP, y.id)
 
-print(users_search.get_search_results(private_token.TOKEN, age_from, age_to, 1, y.city['id'], y.relation).json())
+print(users_search.get_search_results(private_token.TOKEN, age_from, age_to, 1, 1, y.relation).json())
+# y.city['id']
+
+
+
+
+

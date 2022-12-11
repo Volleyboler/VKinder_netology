@@ -12,7 +12,7 @@ import data_base_users
 #         self.relation = 0
 
 
-def get_search_results(token, age_from, age_to, sex, city_id, status):
+def get_search_results(token, age_from, age_to, sex, city_id, status, offset=0,):
     """ Функция для получения информации искомого пользователя """
     info_resp = requests.get(
         'https://api.vk.com/method/users.search',
@@ -24,6 +24,8 @@ def get_search_results(token, age_from, age_to, sex, city_id, status):
             'age_from': age_from,
             'age_to': age_to,
             'status': status,
+            'count': 1000,
+            'offset': offset,
         }
     )
     return info_resp
