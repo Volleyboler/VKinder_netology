@@ -14,6 +14,7 @@
 
 import requests
 import random
+import datetime
 
 import private_token
 import user_settings
@@ -51,7 +52,6 @@ def write_msg(token, user_id, message='empty message', attachments=''):
     )
     return info_resp
 
-# messages.allowMessagesFromGroup
 
 
 
@@ -80,12 +80,32 @@ print(f'age_from = {age_from}')
 age_to = 2022 - int(birth_year) + 2
 print(f'age_to = {age_to}')
 
+def get_conversations_with_users(token):
+    """ Функция для получения информации о беседах с пользователями """
+    info_resp = requests.get(
+        'https://api.vk.com/method/messages.getConversations',
+        params={
+            'access_token': token,
+            'v': 5.131,
 
-write_msg(private_token.TOKEN_APP, y.id)
+        }
+    )
+    return info_resp
+
+
+current_conversations_json = get_conversations_with_users(private_token.TOKEN_APP).json()
+for i in range(current_conversations_json['response']['count']):
+    if (current_conversations_json['response']['items'][i]['conversation']['is_marked_unread'] == True and
+            current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать', 'начать']):
+        write_msg(private_token.TOKEN_APP, current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+
+
+# write_msg(private_token.TOKEN_APP, y.id)
 
 print(users_search.get_search_results(private_token.TOKEN, age_from, age_to, 1, 1, y.relation).json())
 # y.city['id']
 
+# print(int(datetime.time))
 
 
 
