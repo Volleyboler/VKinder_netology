@@ -92,17 +92,24 @@ def get_conversations_with_users(token):
     )
     return info_resp
 
-
-current_conversations_json = get_conversations_with_users(private_token.TOKEN_APP).json()
-for i in range(current_conversations_json['response']['count']):
-    if (current_conversations_json['response']['items'][i]['conversation']['is_marked_unread'] == True and
-            current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать', 'начать']):
-        write_msg(private_token.TOKEN_APP, current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+while True:
+    current_conversations_json = get_conversations_with_users(private_token.TOKEN_APP).json()
+    # print(current_conversations_json)
+    for i in range(current_conversations_json['response']['count']):
+        # if current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать', 'начать']:
+        try:
+            if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать', 'начать']):
+                write_msg(private_token.TOKEN_APP,
+                      current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+                print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
+        except:
+            ...
+    # print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
 
 
 # write_msg(private_token.TOKEN_APP, y.id)
 
-print(users_search.get_search_results(private_token.TOKEN, age_from, age_to, 1, 1, y.relation).json())
+# print(users_search.get_search_results(private_token.TOKEN, age_from, age_to, 1, 1, y.relation).json())
 # y.city['id']
 
 # print(int(datetime.time))
