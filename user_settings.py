@@ -1,9 +1,9 @@
 import requests
 
 
-class SearchUsersOptions:
+class User:
 
-    def __init__(self, token):
+    def __init__(self, token, user_id):
         """
         Дата рождения,
         пол,
@@ -15,15 +15,17 @@ class SearchUsersOptions:
         self.sex = 0
         self.city = {}
         self.relation = 0
-        self.id = 0
+        self.id = user_id
 
     def get_profile_info(self):
         """ Функция для получения информации искомого пользователя """
         info_resp = requests.get(
-            'https://api.vk.com/method/account.getProfileInfo',
+            'https://api.vk.com/method/users.get',
             params={
+                'user_ids': self.id,
                 'access_token': self.token,
                 'v': 5.131,
+                'fields': 'sex, bdate, city, relation'
             }
         )
         return info_resp
@@ -54,7 +56,6 @@ class SearchUsersOptions:
         self.sex = result_response.json()['response']['sex']
         self.city = result_response.json()['response']['city']
         self.relation = result_response.json()['response']['relation']
-        self.id = result_response.json()['response']['id']
         empty_info_list = self.check_profile_info()
         if len(empty_info_list) > 0:
             self.send_msg_to_adding_info(empty_info_list)

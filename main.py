@@ -16,6 +16,7 @@ import requests
 import random
 import datetime
 
+
 import private_token
 import user_settings
 import users_search
@@ -37,48 +38,44 @@ def making_info_response(token):
 
 
 def write_msg(token, user_id, message='empty message', attachments=''):
-#     vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
+    """Функция отправки сообщения пользователю"""
+
     info_resp = requests.get(
-    'https://api.vk.com/method/messages.send',
-    params={
-        'random_id': random.randrange(10 ** 7),
-        'access_token': token,
-        'v': 5.131,
-        'user_id': user_id,
-        'message': message,
-        'attachments': attachments,
-        'group_id': 17668361
-     }
+        'https://api.vk.com/method/messages.send',
+        params={
+            'random_id': random.randrange(10 ** 7),
+            'access_token': token,
+            'v': 5.131,
+            'user_id': user_id,
+            'message': message,
+            'attachments': attachments,
+            # 'group_id': 17668361
+        }
     )
     return info_resp
 
+# x = making_info_response(private_token.TOKEN)
 
+# print(y.city)
+# print(y.sex)
+# print(y.birth_date)
+# print(y.relation)
+#
+# y.set_options_from_profile()
+# print(y.city)
+# print(y.sex)
+# print(y.birth_date)
+# print(y.relation)
+# print(y.id)
 
+# print(x.json())
+#
+# birth_year = y.birth_date.split('.')[2]
+# age_from = 2022 - int(birth_year) - 2
+# print(f'age_from = {age_from}')
+# age_to = 2022 - int(birth_year) + 2
+# print(f'age_to = {age_to}')
 
-y = user_settings.SearchUsersOptions(private_token.TOKEN)
-
-x = making_info_response(private_token.TOKEN)
-
-print(y.city)
-print(y.sex)
-print(y.birth_date)
-print(y.relation)
-
-
-y.set_options_from_profile()
-print(y.city)
-print(y.sex)
-print(y.birth_date)
-print(y.relation)
-print(y.id)
-
-print(x.json())
-
-birth_year = y.birth_date.split('.')[2]
-age_from = 2022 - int(birth_year) - 2
-print(f'age_from = {age_from}')
-age_to = 2022 - int(birth_year) + 2
-print(f'age_to = {age_to}')
 
 def get_conversations_with_users(token):
     """ Функция для получения информации о беседах с пользователями """
@@ -92,20 +89,32 @@ def get_conversations_with_users(token):
     )
     return info_resp
 
-while True:
-    current_conversations_json = get_conversations_with_users(private_token.TOKEN_APP).json()
-    # print(current_conversations_json)
-    for i in range(current_conversations_json['response']['count']):
-        # if current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать', 'начать']:
-        try:
-            if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать', 'начать']):
-                write_msg(private_token.TOKEN_APP,
-                      current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
-                print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
-        except:
-            ...
-    # print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
 
+current_users = {}
+
+
+def checking_start_message():
+    while True:
+        current_conversations_json = get_conversations_with_users(private_token.TOKEN_APP).json()
+        for i in range(current_conversations_json['response']['count']):
+            try:
+                if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and
+                        current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать',
+                                                                                                       'начать']):
+                    write_msg(private_token.TOKEN_APP,
+                              current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+                    current_user = user_settings.User(private_token.TOKEN_APP,
+                                                      current_conversations_json['response']['items'][i][
+                                                          'conversation'][
+                                                          'peer']['id'])
+                    current_users[current_conversations_json['response']['items'][i]['conversation'][
+                        'peer']['id']] = current_user
+                print("check1")
+                print(current_users)
+            except:
+                ...
+
+    # print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
 
 # write_msg(private_token.TOKEN_APP, y.id)
 
@@ -113,7 +122,3 @@ while True:
 # y.city['id']
 
 # print(int(datetime.time))
-
-
-
-
