@@ -1,4 +1,6 @@
 import requests
+import main
+import private_token
 
 
 class User:
@@ -45,10 +47,10 @@ class User:
             empty_info_list.append("статус отношений")
         return empty_info_list
 
-    def send_msg_to_adding_info(self, empty_info_list: list):
-        requesting_info_string = ",".join(empty_info_list)
-        print(f"Ошибка! В вашем профиле необходимо заполнить поля: {requesting_info_string}.")
-        ...
+    # def send_msg_to_adding_info(self, empty_info_list: list):
+    #     requesting_info_string = ",".join(empty_info_list)
+    #     print(f"Ошибка! В вашем профиле необходимо заполнить поля: {requesting_info_string}.")
+    #     ...
 
     def set_options_from_profile(self):
         result_response = self.get_profile_info()
@@ -58,6 +60,11 @@ class User:
         self.relation = result_response.json()['response']['relation']
         empty_info_list = self.check_profile_info()
         if len(empty_info_list) > 0:
-            self.send_msg_to_adding_info(empty_info_list)
-
-
+            message = (f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле "
+                       f"{', '.join(empty_info_list)}.")
+            print("check")
+            # self.send_msg_to_adding_info(empty_info_list)
+        else:
+            message = (f"Критерии поиска будут сформированы на базе вашего профиля:/n  Дата рождения: {self.birth_date},"
+                       f" /nпол: {self.sex}, /nгород: {self.city}, /nсемейное положение: {self.relation}.")
+        main.write_msg(private_token.TOKEN_APP, self.id, message=message)

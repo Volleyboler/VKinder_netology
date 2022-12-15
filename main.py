@@ -1,21 +1,6 @@
-# for event in longpoll.listen():
-#     if event.type == VkEventType.MESSAGE_NEW:
-#
-#         if event.to_me:
-#             request = event.text
-#
-#             if request == "привет":
-#                 write_msg(event.user_id, f"Хай, {event.user_id}")
-#             elif request == "пока":
-#                 write_msg(event.user_id, "Пока((")
-#             else:
-#                 write_msg(event.user_id, "Не поняла вашего ответа...")
-
-
 import requests
 import random
 import datetime
-
 
 import private_token
 import user_settings
@@ -31,7 +16,6 @@ def making_info_response(token):
         params={
             'access_token': token,
             'v': 5.131,
-
         }
     )
     return info_resp
@@ -49,10 +33,10 @@ def write_msg(token, user_id, message='empty message', attachments=''):
             'user_id': user_id,
             'message': message,
             'attachments': attachments,
-            # 'group_id': 17668361
         }
     )
     return info_resp
+
 
 # x = making_info_response(private_token.TOKEN)
 
@@ -90,31 +74,44 @@ def get_conversations_with_users(token):
     return info_resp
 
 
-current_users = {}
-
-
 def checking_start_message():
+    active_users = {}
     while True:
         current_conversations_json = get_conversations_with_users(private_token.TOKEN_APP).json()
         for i in range(current_conversations_json['response']['count']):
             try:
                 if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and
-                        current_conversations_json['response']['items'][i]['last_message']['text'] in ['Начать',
-                                                                                                       'начать']):
+                        str(current_conversations_json['response']['items'][i]['last_message']['text']
+                            ).lower() == 'начать'):
                     write_msg(private_token.TOKEN_APP,
+                              current_conversations_json['response']['items'][i]['conversation']['peer']['id'],
                               current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+                    print("check1")
                     current_user = user_settings.User(private_token.TOKEN_APP,
                                                       current_conversations_json['response']['items'][i][
                                                           'conversation'][
                                                           'peer']['id'])
-                    current_users[current_conversations_json['response']['items'][i]['conversation'][
+                    print("check2")
+                    current_user.set_options_from_profile()
+                    print("check3")
+                    active_users[current_conversations_json['response']['items'][i]['conversation'][
                         'peer']['id']] = current_user
-                print("check1")
-                print(current_users)
+                # print("check1")
+                # print(active_users)
+
             except:
                 ...
+        if len(active_users) > 0:
+            print(active_users)
+            return active_users
 
-    # print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
+current_users = checking_start_message()
+
+# for user_id, user in current_users.values():
+
+
+
+# print(current_conversations_json['response']['items'][i]['conversation']['peer']['unread_count'])
 
 # write_msg(private_token.TOKEN_APP, y.id)
 
