@@ -108,7 +108,13 @@ def checking_start_message():
             print(active_users)
             return active_users
 
+
 current_users = checking_start_message()
+
+# user = user_settings.User(private_token.TOKEN_APP, 17668361)
+# info = user.get_profile_info().json()
+# print(info)
+
 
 # for user_id, user in current_users.values():
 

@@ -16,9 +16,9 @@ class User:
         """
         self.token = token
         self.birth_date = ''
-        self.sex = 0
+        self.sex = -1
         self.city = {}
-        self.relation = 0
+        self.relation = -1
         self.id = user_id
 
     def write_msg(self, token, user_id, message='empty message', attachments=''):
@@ -33,6 +33,7 @@ class User:
                 'user_id': user_id,
                 'message': message,
                 'attachments': attachments,
+#                 'keyboard': {}
             }
         )
         return info_resp
@@ -46,7 +47,7 @@ class User:
                 'user_ids': self.id,
                 'access_token': self.token,
                 'v': 5.131,
-                'fields': 'sex, bdate, city, relation'
+                'fields': 'relation_partner, sex, bdate, city,'
             }
         )
         return info_resp
@@ -55,6 +56,10 @@ class User:
         ...
 
     def check_profile_info(self):
+        """
+
+        :return:
+        """
         empty_info_list = []
         if self.birth_date == '':
             empty_info_list.append("дата рождения")
@@ -62,8 +67,8 @@ class User:
             empty_info_list.append("пол")
         if self.city == {}:
             empty_info_list.append("город")
-        if self.relation == 0:
-            empty_info_list.append("статус отношений")
+        # if self.relation == 0:
+        #     empty_info_list.append("статус отношений")
         return empty_info_list
 
     # def send_msg_to_adding_info(self, empty_info_list: list):
@@ -88,7 +93,7 @@ class User:
             print(message_user_info)
             # self.send_msg_to_adding_info(empty_info_list)
         else:
-            message_user_info = (f"Критерии поиска будут сформированы на базе вашего профиля:\n  Дата рождения: {self.birth_date}\nпол: {self.sex}\nгород: {self.city['title']}\nсемейное положение: {self.relation}.")
+            message_user_info = (f"Критерии поиска будут сформированы на базе информации вашего профиля:\nДата рождения: {self.birth_date}\nпол: {self.sex}\nгород: {self.city['title']}\nсемейное положение: {self.relation}.")
             print(message_user_info)
         time.sleep(1.0)
         self.write_msg(private_token.TOKEN_APP, self.id, message_user_info)
