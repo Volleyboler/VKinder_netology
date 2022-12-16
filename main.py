@@ -83,14 +83,15 @@ def checking_start_message():
                 if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and
                         str(current_conversations_json['response']['items'][i]['last_message']['text']
                             ).lower() == 'начать'):
-                    write_msg(private_token.TOKEN_APP,
-                              current_conversations_json['response']['items'][i]['conversation']['peer']['id'],
-                              current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+                #    write_msg(private_token.TOKEN_APP,
+                 #             current_conversations_json['response']['items'][i]['conversation']['peer']['id'],
+                  #            current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
                     print("check1")
-                    current_user = user_settings.User(private_token.TOKEN_APP,
-                                                      current_conversations_json['response']['items'][i][
-                                                          'conversation'][
-                                                          'peer']['id'])
+                    print(private_token.TOKEN_APP)
+                    print(current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+                    user_settings.User(private_token.TOKEN_APP, current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
+                    print("checkUser")
+                    current_user = user_settings.User(private_token.TOKEN_APP, current_conversations_json['response']['items'][i]['conversation']['peer']['id'])
                     print("check2")
                     current_user.set_options_from_profile()
                     print("check3")
@@ -100,6 +101,8 @@ def checking_start_message():
                 # print(active_users)
 
             except:
+                ...
+            finally:
                 ...
         if len(active_users) > 0:
             print(active_users)

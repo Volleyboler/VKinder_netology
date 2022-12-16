@@ -13,7 +13,7 @@ import data_base_users
 
 
 def get_search_results(token, age_from, age_to, sex, city_id, status, offset=0,):
-    """ Функция для получения информации искомого пользователя """
+    """  """
     info_resp = requests.get(
         'https://api.vk.com/method/users.search',
         params={
