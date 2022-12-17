@@ -1,8 +1,10 @@
-import time
+import datetime
 
 import requests
+
+import bot_vk
 import private_token
-import random
+import dictionaries_vk
 
 
 class User:
@@ -15,29 +17,13 @@ class User:
         семейное положение.
         """
         self.token = token
-        self.birth_date = ''
+        self.age = ''
         self.sex = -1
         self.city = {}
         self.relation = -1
         self.id = user_id
-
-    def write_msg(self, token, user_id, message='empty message', attachments=''):
-        """Функция отправки сообщения пользователю"""
-
-        info_resp = requests.get(
-            'https://api.vk.com/method/messages.send',
-            params={
-                'random_id': random.randrange(10 ** 7),
-                'access_token': token,
-                'v': 5.131,
-                'user_id': user_id,
-                'message': message,
-                'attachments': attachments,
-#                 'keyboard': {}
-            }
-        )
-        return info_resp
-
+        self.first_name = ''
+        self.last_name = ''
 
     def get_profile_info(self):
         """ Функция для получения информации искомого пользователя """
@@ -47,29 +33,13 @@ class User:
                 'user_ids': self.id,
                 'access_token': self.token,
                 'v': 5.131,
-                'fields': 'relation_partner, sex, bdate, city,'
+                'fields': 'relation, sex, bdate, city,'
             }
         )
         return info_resp
 
     def get_search_options(self):
         ...
-
-    def check_profile_info(self):
-        """
-
-        :return:
-        """
-        empty_info_list = []
-        if self.birth_date == '':
-            empty_info_list.append("дата рождения")
-        if self.sex == 0:
-            empty_info_list.append("пол")
-        if self.city == {}:
-            empty_info_list.append("город")
-        # if self.relation == 0:
-        #     empty_info_list.append("статус отношений")
-        return empty_info_list
 
     # def send_msg_to_adding_info(self, empty_info_list: list):
     #     requesting_info_string = ",".join(empty_info_list)
@@ -78,22 +48,49 @@ class User:
 
     def set_options_from_profile(self):
         result_response = self.get_profile_info().json()
+        empty_info_list = []
         print(result_response)
-        self.birth_date = result_response['response'][0]['bdate']
-        print(self.birth_date)
-        self.sex = result_response['response'][0]['sex']
+        try:
+            self.first_name = result_response['response'][0]['first_name']
+        except:
+            print('Отсутствует имя пользователя')
+        try:
+            self.last_name = result_response['response'][0]['last_name']
+        except:
+            print('Отсутствует фамилия пользователя')
+        try:
+            birth_date = result_response['response'][0]['bdate']
+            birth_date_list = [int(x) for x in birth_date.split('.')]
+
+            if len(birth_date_list) < 3:
+                raise
+            else:
+                current_date_list = [int(x) for x in str(datetime.date.today()).split('-')]
+                if current_date_list[1:2] >= birth_date_list[-2:-3]:
+                    self.age = current_date_list[0] - birth_date_list[-1]
+        except:
+            empty_info_list.append("год рождения")
+        try:
+            self.sex = result_response['response'][0]['sex']
+        except:
+            empty_info_list.append("пол")
+        try:
+            self.city = result_response['response'][0]['city']
+        except:
+            empty_info_list.append("город")
+        try:
+            self.relation = result_response['response'][0]['relation']
+        except:
+            empty_info_list.append("статус отношений")
+
+        print(self.age)
         print(self.sex)
-        self.city = result_response['response'][0]['city']
         print(self.city)
-        # self.relation = result_response['response'][0]['relation']
         print(self.relation)
-        empty_info_list = self.check_profile_info()
         if len(empty_info_list) > 0:
-            message_user_info = (f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_list)}.")
-            print(message_user_info)
-            # self.send_msg_to_adding_info(empty_info_list)
+            message_user_info = f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_list)}."
         else:
-            message_user_info = (f"Критерии поиска будут сформированы на базе информации вашего профиля:\nДата рождения: {self.birth_date}\nпол: {self.sex}\nгород: {self.city['title']}\nсемейное положение: {self.relation}.")
-            print(message_user_info)
-        time.sleep(1.0)
-        self.write_msg(private_token.TOKEN_APP, self.id, message_user_info)
+            message_user_info = f"Информация вашего профиля:\nВозраст: {self.age}\nпол: {dictionaries_vk.sex_dict[self.sex]}\nгород: {self.city['title']}\nсемейное положение: {dictionaries_vk.relations_dict[self.sex][self.relation]}."
+        print(message_user_info)
+        # time.sleep(1.0)
+        bot_vk.BotVK.write_msg(private_token.TOKEN_APP, self.id, message_user_info)

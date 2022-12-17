@@ -61,3 +61,6 @@ class BlackList(Base):
 
 
 Base.metadata.create_all(engine)
+
+
+data_base_of_results = {}
