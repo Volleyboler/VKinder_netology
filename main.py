@@ -13,6 +13,12 @@ import data_base_users
 group_bot_vk = bot_vk.BotVK()
 current_users = group_bot_vk.checking_start_message()
 
+user = current_users[17668361]
+new_users_search = users_search.UsersSearch(private_token.TOKEN, 17668361, user.age, user.sex, user.city, user.relation)
+new_users_search.searching_users()
+print(user)
+print(data_base_users.data_base_of_results)
+print(len(data_base_users.data_base_of_results[17668361]))
 # users_search.UsersSearch(current_users)
 #
 # print(data_base_users.data_base_of_results)
