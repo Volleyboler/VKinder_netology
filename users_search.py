@@ -65,11 +65,12 @@ class UsersSearch:
             for user_number in search_results['response']['items']:
                 # print(user_number)
                 try:
-                    photos_info = self.get_user_photos(user_number['id'])
-                    print(photos_info.json())
+                    photos_info = self.get_user_photos(user_number['id']).json()
+                    print(photos_info)
                     photos = self.get_best_photos(photos_info)
                     print(photos)
                 except:
+                    print('wrong')
                     continue
                 data_base_users.data_base_of_results[self.user_id].append({user_number['id']: photos})
 
@@ -91,10 +92,14 @@ class UsersSearch:
     def get_best_photos(self, photos_info):
         best_photos = {}
         for photo in photos_info['response']['items']:
+            print('wrong1')
             name_photo = f"<photo><{photo['owner_id']}><{photo['id']}>"
+            print('wrong2')
             best_photos[name_photo] = photo['likes']['count'] + photo['comments']['count']
+            print('wrong3')
             time.sleep(0.25)
         best_photos_sorted = sorted(best_photos, key=best_photos.values())
+        print('wrong4')
         return best_photos_sorted.keys[-1:-4]
 
 
