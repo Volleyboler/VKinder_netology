@@ -51,6 +51,15 @@ class UsersSearch:
         status = self.relation
         return {'age_from': age_from, 'age_to': age_to, 'sex': sex, 'city_id': city_id, 'status': status}
 
+    def get_best_photos(self, photos_info):
+        best_photos = {}
+        for photo in photos_info['response']['items']:
+            name_photo = f"<photo><{photo['owner_id']}><{photo['id']}>"
+            best_photos[name_photo] = photo['likes']['count'] + photo['comments']['count']
+            time.sleep(0.5)
+        best_photos_sorted = dict(sorted(best_photos.items(), key=(lambda item: item[1])))
+        return best_photos_sorted.keys[-1:-4]
+
     def searching_users(self):
         params = self.calculating_search_parameters()
         # bot_vk.BotVK.write_msg()
@@ -89,17 +98,6 @@ class UsersSearch:
         )
         return info_resp
 
-    def get_best_photos(self, photos_info):
-        best_photos = {}
-        for photo in photos_info['response']['items']:
-            print('wrong1')
-            name_photo = f"<photo><{photo['owner_id']}><{photo['id']}>"
-            print('wrong2')
-            best_photos[name_photo] = photo['likes']['count'] + photo['comments']['count']
-            print('wrong3')
-            time.sleep(0.25)
-        best_photos_sorted = sorted(best_photos, key=best_photos.values())
-        print('wrong4')
-        return best_photos_sorted.keys[-1:-4]
+
 
 
