@@ -51,6 +51,15 @@ class UsersSearch:
         status = self.relation
         return {'age_from': age_from, 'age_to': age_to, 'sex': sex, 'city_id': city_id, 'status': status}
 
+    def get_best_photos(self, photos_info):
+        best_photos = {}
+        for photo in photos_info['response']['items']:
+            name_photo = f"<photo><{photo['owner_id']}><{photo['id']}>"
+            best_photos[name_photo] = photo['likes']['count'] + photo['comments']['count']
+            time.sleep(0.5)
+        best_photos_sorted = dict(sorted(best_photos.items(), key=(lambda item: item[1])))
+        return best_photos_sorted.keys[-1:-4]
+
     def searching_users(self):
         params = self.calculating_search_parameters()
         # bot_vk.BotVK.write_msg()
@@ -58,7 +67,7 @@ class UsersSearch:
         counts = 1
         while param_offset < counts:
             search_results = self.get_search_results(self.token, params['age_from'], params['age_to'], params['sex'], params['city_id'], params['status'], offset=0,).json()
-            print(search_results)
+            # print(search_results)
             counts = search_results['response']['count']
             param_offset += 1000
             data_base_users.data_base_of_results[self.user_id] = []
@@ -67,7 +76,7 @@ class UsersSearch:
                 try:
                     photos_info = self.get_user_photos(user_number['id'])
                     print(photos_info.json())
-                    photos = self.get_best_photos(photos_info)
+                    photos = self.get_best_photos(photos_info.json())
                     print(photos)
                 except:
                     continue
@@ -88,13 +97,6 @@ class UsersSearch:
         )
         return info_resp
 
-    def get_best_photos(self, photos_info):
-        best_photos = {}
-        for photo in photos_info['response']['items']:
-            name_photo = f"<photo><{photo['owner_id']}><{photo['id']}>"
-            best_photos[name_photo] = photo['likes']['count'] + photo['comments']['count']
-            time.sleep(0.25)
-        best_photos_sorted = sorted(best_photos, key=best_photos.values())
-        return best_photos_sorted.keys[-1:-4]
+
 
 
