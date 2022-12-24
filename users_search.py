@@ -3,12 +3,8 @@ import time
 
 import bot_vk
 import data_base_users
+import private_token
 
-# self.token = token
-#         self.birth_date = ''
-#         self.sex = 0
-#         self.city = {}
-#         self.relation = 0
 
 class UsersSearch:
     def __init__(self, token: str, user_id: int, age: int, sex: int, city: dict, relation: int):
@@ -19,26 +15,35 @@ class UsersSearch:
         self.relation = relation
         self.user_id = user_id
 
-    def get_search_results(self, token, age_from, age_to, sex, city_id, status, offset=0,):
-        """  """
-
+    def get_search_results(self, offset=0):
+        """
+        Метод формирует запрос на поиск пользователей, основываясь на параметрах профиля пользователя инициирующего поиск
+        :param offset: сдвиг выборки
+        :return: объект результат запроса
+        """
+        params = self._calculating_search_parameters()
         info_resp = requests.get(
             'https://api.vk.com/method/users.search',
             params={
-                'access_token': token,
+                'access_token': self.token,
                 'v': 5.131,
-                'city_id': city_id,
-                'sex': sex,
-                'age_from': age_from,
-                'age_to': age_to,
-                'status': status,
+                'city_id': params['city_id'],
+                'sex': params['sex'],
+                'age_from': params['age_from'],
+                'age_to': params['age_to'],
+                'status': params['status'],
                 'count': 1000,
                 'offset': offset,
+                'fields': 'domain',
             }
         )
         return info_resp
 
-    def calculating_search_parameters(self):
+    def _calculating_search_parameters(self):
+        """
+        Вычисление данных поиска на основе информации пользователя
+        :return:
+        """
         age_from = self.age - 1
         age_to = self.age + 1
         if self.sex == 1:
@@ -52,40 +57,56 @@ class UsersSearch:
         return {'age_from': age_from, 'age_to': age_to, 'sex': sex, 'city_id': city_id, 'status': status}
 
     def get_best_photos(self, photos_info):
-        best_photos = {}
+        """
+        Метод возвращает 3 фотографии пользователя исходя из количества лайков и комментариев
+        :param photos_info: результат запроса всех фото профиля пользователя в формате json
+        :return: список с описанием 3 фото
+        """
+        best_photos = []
         for photo in photos_info['response']['items']:
-            name_photo = f"<photo><{photo['owner_id']}><{photo['id']}>"
-            best_photos[name_photo] = photo['likes']['count'] + photo['comments']['count']
-            time.sleep(0.5)
-        best_photos_sorted = dict(sorted(best_photos.items(), key=(lambda item: item[1])))
-        return best_photos_sorted.keys[-1:-4]
+            name_photo = f"photo{photo['owner_id']}_{photo['id']}"
+            count_likes_and_comments = photo['likes']['count'] + photo['comments']['count']
+            best_photos.append((count_likes_and_comments, name_photo))
+        if len(best_photos) > 2:
+            best_photos.sort(reverse=True)
+            return [best_photos[0][1], best_photos[1][1], best_photos[2][1]]
+        else:
+            return False
 
     def searching_users(self):
-        params = self.calculating_search_parameters()
-        # bot_vk.BotVK.write_msg()
+        """
+
+        :return:
+        """
+        params = self._calculating_search_parameters()
         param_offset = 0
         counts = 1
         while param_offset < counts:
-            search_results = self.get_search_results(self.token, params['age_from'], params['age_to'], params['sex'], params['city_id'], params['status'], offset=0,).json()
+            search_results = self.get_search_results(self.token, params['age_from'], params['age_to'], params['sex'],
+                                                     params['city_id'], params['status'], offset=param_offset,).json()
             print(search_results)
             counts = search_results['response']['count']
             param_offset += 1000
-            data_base_users.data_base_of_results[self.user_id] = []
+            data_base_users.data_base_of_good_results[self.user_id] = []
             for user_number in search_results['response']['items']:
-                # print(user_number)
-                try:
-                    photos_info = self.get_user_photos(user_number['id']).json()
-                    print(photos_info)
+                time.sleep(0.2)
+                photos_info = self.get_user_photos(user_number['id']).json()
+                if 'response' in photos_info.keys():
                     photos = self.get_best_photos(photos_info)
-                    print(photos)
-                except:
-                    print('wrong')
-                    continue
-                data_base_users.data_base_of_results[self.user_id].append({user_number['id']: photos})
+                    if photos:
+                        message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\nhttps://vk" \
+                                                f".com/{user_number['domain']} "
+                        bot_vk.BotVK.write_msg(private_token.GROUP_TOKEN, self.user_id, message=message_about_profile,
+                                               attachment=",".join(photos))
+                        # bot_vk.checking_start_message()
+                        data_base_users.data_base_of_good_results[self.user_id].append({user_number['id']: photos})
 
     def get_user_photos(self, owner_id):
-        """ Получаем информацию о фотографиях профиля искомого пользователя """
-
+        """
+        Метод получения всех фото профиля пользователя
+        :param owner_id: id пользователя, по которому запрашивается информация
+        :return: объект ответа на запрос
+        """
         info_resp = requests.get(
             'https://api.vk.com/method/photos.get',
             params={

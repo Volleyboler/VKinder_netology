@@ -1,16 +1,16 @@
 import random
 import requests
 
-import private_token
 import user_settings
 
 
 class BotVK:
-    def __init__(self):
-        ...
+    def __init__(self, user_token, group_token):
+        self.user_token = user_token
+        self.group_token = group_token
 
     @staticmethod
-    def write_msg(token, user_id, message='empty message', attachments=''):
+    def write_msg(token, user_id, message='empty message', attachment=''):
         """Функция отправки сообщения пользователю"""
 
         info_resp = requests.get(
@@ -21,7 +21,7 @@ class BotVK:
                 'v': 5.131,
                 'user_id': user_id,
                 'message': message,
-                'attachments': attachments,
+                'attachment': attachment,
                 #                 'keyboard': {}
             }
         )
@@ -39,49 +39,32 @@ class BotVK:
         )
         return info_resp
 
-    def checking_user_message(self, active_users: dict):
-        while True:
-            current_conversations_json = self.get_conversations_with_users(private_token.TOKEN_APP).json()
-            for i in range(current_conversations_json['response']['count']):
-                try:
-                    if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and
-                            str(current_conversations_json['response']['items'][i]['last_message']['text']
-                                ).lower() == 'начать'):
-                        user_settings.User(private_token.TOKEN,
-                                           current_conversations_json['response']['items'][i]['conversation']['peer'][
-                                               'id'])
-                        current_user = user_settings.User(private_token.TOKEN,
-                                                          current_conversations_json['response']['items'][i][
-                                                              'conversation']['peer']['id'])
-                        current_user.set_options_from_profile()
-                        active_users[current_conversations_json['response']['items'][i]['conversation'][
-                            'peer']['id']] = current_user
-                except:
-                    continue
-                finally:
-                    ...
-            if len(active_users) > 0:
-                print(active_users)
-                return active_users
+    def creating_user_class(self, user_id):
+        current_user = user_settings.User(self.user_token, user_id)
+        current_user.set_options_from_profile()
+        return current_user
 
-    def checking_start_message(self):
+    def checking_start_message(self, flag_request=False):
+        """
+        Проверка сообщения от пользователя
+        :return:
+        """
         active_users = {}
         while True:
-            current_conversations_json = self.get_conversations_with_users(private_token.TOKEN_APP).json()
+            current_conversations_json = self.get_conversations_with_users(self.group_token).json()
             for i in range(current_conversations_json['response']['count']):
                 try:
-                    if (current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1 and
-                            str(current_conversations_json['response']['items'][i]['last_message']['text']
-                                ).lower() == 'начать'):
-                        user_settings.User(private_token.TOKEN,
-                                           current_conversations_json['response']['items'][i]['conversation']['peer'][
-                                               'id'])
-                        current_user = user_settings.User(private_token.TOKEN,
-                                                          current_conversations_json['response']['items'][i][
-                                                              'conversation']['peer']['id'])
-                        current_user.set_options_from_profile()
-                        active_users[current_conversations_json['response']['items'][i]['conversation'][
-                            'peer']['id']] = current_user
+                    if current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1:
+                        user_message = current_conversations_json['response']['items'][i]['last_message']['text']
+                        if str(user_message).lower() == 'начать':
+                            user_id = current_conversations_json['response']['items'][i]['conversation']['peer']['id']
+                            current_user = self.creating_user_class(user_id)
+                            active_users[user_id] = current_user
+                        #
+                        #
+                        # elif str(user_message).lower() == 'начать':
+
+
                 except:
                     ...
                 finally:

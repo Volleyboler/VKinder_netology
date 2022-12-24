@@ -10,15 +10,15 @@ import comparing_results
 import data_base_users
 
 
-group_bot_vk = bot_vk.BotVK()
+group_bot_vk = bot_vk.BotVK(private_token.USER_TOKEN, private_token.GROUP_TOKEN)
 current_users = group_bot_vk.checking_start_message()
 for user_id in current_users.keys():
     user = current_users[user_id]
-    new_users_search = users_search.UsersSearch(private_token.TOKEN, user_id, user.age, user.sex, user.city, user.relation)
+    new_users_search = users_search.UsersSearch(private_token.USER_TOKEN, user_id, user.age, user.sex,
+                                                user.city, user.relation)
     new_users_search.searching_users()
-print(user)
-print(data_base_users.data_base_of_results)
-print(len(data_base_users.data_base_of_results[17668361]))
+print(data_base_users.data_base_of_good_results)
+print(len(data_base_users.data_base_of_good_results[17668361]))
 # users_search.UsersSearch(current_users)
 #
 # print(data_base_users.data_base_of_results)

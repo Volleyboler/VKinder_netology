@@ -93,4 +93,4 @@ class User:
             message_user_info = f"Информация вашего профиля:\nВозраст: {self.age}\nпол: {dictionaries_vk.sex_dict[self.sex]}\nгород: {self.city['title']}\nсемейное положение: {dictionaries_vk.relations_dict[self.sex][self.relation]}."
         print(message_user_info)
         # time.sleep(1.0)
-        bot_vk.BotVK.write_msg(private_token.TOKEN_APP, self.id, message_user_info)
+        bot_vk.BotVK.write_msg(private_token.GROUP_TOKEN, self.id, message_user_info)
