@@ -82,8 +82,7 @@ class UsersSearch:
         param_offset = 0
         counts = 1
         while param_offset < counts:
-            search_results = self.get_search_results(self.token, params['age_from'], params['age_to'], params['sex'],
-                                                     params['city_id'], params['status'], offset=param_offset,).json()
+            search_results = self.get_search_results(offset=param_offset,).json()
             print(search_results)
             counts = search_results['response']['count']
             param_offset += 1000

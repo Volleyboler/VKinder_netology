@@ -39,12 +39,11 @@ class User:
         return info_resp
 
     def get_search_options(self):
+        """
+        Функция получения информации о пользователе через чат
+        :return:
+        """
         ...
-
-    # def send_msg_to_adding_info(self, empty_info_list: list):
-    #     requesting_info_string = ",".join(empty_info_list)
-    #     print(f"Ошибка! В вашем профиле необходимо заполнить поля: {requesting_info_string}.")
-    #     ...
 
     def set_options_from_profile(self):
         result_response = self.get_profile_info().json()
@@ -88,9 +87,8 @@ class User:
         print(self.city)
         print(self.relation)
         if len(empty_info_list) > 0:
-            message_user_info = f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_list)}."
+            message_user_info = f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_list)}.\n1 - Внести недостающую информацию в чате\n2 - Завершить поиск"
         else:
             message_user_info = f"Информация вашего профиля:\nВозраст: {self.age}\nпол: {dictionaries_vk.sex_dict[self.sex]}\nгород: {self.city['title']}\nсемейное положение: {dictionaries_vk.relations_dict[self.sex][self.relation]}."
         print(message_user_info)
-        # time.sleep(1.0)
         bot_vk.BotVK.write_msg(private_token.GROUP_TOKEN, self.id, message_user_info)

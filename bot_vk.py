@@ -44,7 +44,7 @@ class BotVK:
         current_user.set_options_from_profile()
         return current_user
 
-    def checking_start_message(self, flag_request=False):
+    def checking_user_message(self, flag_request=False):
         """
         Проверка сообщения от пользователя
         :return:
