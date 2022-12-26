@@ -9,15 +9,14 @@ class BotVK:
         self.user_token = user_token
         self.group_token = group_token
 
-    @staticmethod
-    def write_msg(token, user_id, message='empty message', attachment=''):
+    def write_msg(self, user_id, message='empty message', attachment=''):
         """Функция отправки сообщения пользователю"""
 
         info_resp = requests.get(
             'https://api.vk.com/method/messages.send',
             params={
                 'random_id': random.randrange(10 ** 7),
-                'access_token': token,
+                'access_token': self.group_token,
                 'v': 5.131,
                 'user_id': user_id,
                 'message': message,
@@ -26,6 +25,10 @@ class BotVK:
             }
         )
         return info_resp
+
+    def asking_question_and_get_answer_from_user(self, user_id, message='empty message', attachment='', flag_request=False):
+        self.write_msg()
+        self.checking_user_message()
 
     def get_conversations_with_users(self, token):
         """ Функция для получения информации о беседах с пользователями """
@@ -53,22 +56,14 @@ class BotVK:
         while True:
             current_conversations_json = self.get_conversations_with_users(self.group_token).json()
             for i in range(current_conversations_json['response']['count']):
-                try:
+                if 'unread_count' in current_conversations_json['response']['items'][i]['conversation'].keys():
                     if current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1:
                         user_message = current_conversations_json['response']['items'][i]['last_message']['text']
                         if str(user_message).lower() == 'начать':
                             user_id = current_conversations_json['response']['items'][i]['conversation']['peer']['id']
                             current_user = self.creating_user_class(user_id)
                             active_users[user_id] = current_user
-                        #
-                        #
-                        # elif str(user_message).lower() == 'начать':
 
-
-                except:
-                    ...
-                finally:
-                    ...
             if len(active_users) > 0:
                 print(active_users)
                 return active_users
