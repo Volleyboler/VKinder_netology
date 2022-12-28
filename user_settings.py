@@ -9,7 +9,7 @@ import dictionaries_vk
 
 class User:
 
-    def __init__(self, token, user_id):
+    def __init__(self, token, user_id, bot_instance):
         """
         Дата рождения,
         пол,
@@ -24,6 +24,7 @@ class User:
         self.id = user_id
         self.first_name = ''
         self.last_name = ''
+        self.bot_instance = bot_instance
 
     def get_profile_info(self):
         """ Функция для получения информации искомого пользователя """
@@ -51,11 +52,11 @@ class User:
         print(result_response)
         try:
             self.first_name = result_response['response'][0]['first_name']
-        except:
+        except KeyError:
             print('Отсутствует имя пользователя')
         try:
             self.last_name = result_response['response'][0]['last_name']
-        except:
+        except KeyError:
             print('Отсутствует фамилия пользователя')
         try:
             birth_date = result_response['response'][0]['bdate']
@@ -67,19 +68,23 @@ class User:
                 current_date_list = [int(x) for x in str(datetime.date.today()).split('-')]
                 if current_date_list[1:2] >= birth_date_list[-2:-3]:
                     self.age = current_date_list[0] - birth_date_list[-1]
-        except:
+            if self.age < 18:
+                raise ValueError
+        except ValueError:
+            empty_info_list.append("год рождения(Для использования сервиса необходим возраст 18+)")
+        except KeyError:
             empty_info_list.append("год рождения")
         try:
             self.sex = result_response['response'][0]['sex']
-        except:
+        except KeyError:
             empty_info_list.append("пол")
         try:
             self.city = result_response['response'][0]['city']
-        except:
+        except KeyError:
             empty_info_list.append("город")
         try:
             self.relation = result_response['response'][0]['relation']
-        except:
+        except KeyError:
             empty_info_list.append("статус отношений")
 
         print(self.age)
@@ -91,4 +96,4 @@ class User:
         else:
             message_user_info = f"Информация вашего профиля:\nВозраст: {self.age}\nпол: {dictionaries_vk.sex_dict[self.sex]}\nгород: {self.city['title']}\nсемейное положение: {dictionaries_vk.relations_dict[self.sex][self.relation]}."
         print(message_user_info)
-        bot_vk.BotVK.write_msg(private_token.GROUP_TOKEN, self.id, message_user_info)
+        self.bot_instance.write_msg(self.id, message_user_info)

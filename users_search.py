@@ -7,13 +7,14 @@ import private_token
 
 
 class UsersSearch:
-    def __init__(self, token: str, user_id: int, age: int, sex: int, city: dict, relation: int):
+    def __init__(self, token: str, user_id: int, age: int, sex: int, city: dict, relation: int, bot_instance):
         self.token = token
         self.age = age
         self.sex = sex
         self.city = city
         self.relation = relation
         self.user_id = user_id
+        self.bot_instance = bot_instance
 
     def get_search_results(self, offset=0):
         """
@@ -44,7 +45,10 @@ class UsersSearch:
         Вычисление данных поиска на основе информации пользователя
         :return:
         """
-        age_from = self.age - 1
+        if self.age == 18:
+            age_from = self.age - 1
+        else:
+            age_from = 18
         age_to = self.age + 1
         if self.sex == 1:
             sex = 2
@@ -78,7 +82,6 @@ class UsersSearch:
 
         :return:
         """
-        params = self._calculating_search_parameters()
         param_offset = 0
         counts = 1
         while param_offset < counts:
@@ -95,8 +98,8 @@ class UsersSearch:
                     if photos:
                         message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\nhttps://vk" \
                                                 f".com/{user_number['domain']} "
-                        bot_vk.BotVK.write_msg(private_token.GROUP_TOKEN, self.user_id, message=message_about_profile,
-                                               attachment=",".join(photos))
+                        self.bot_instance.write_msg(self.user_id, message=message_about_profile,
+                                                    attachment=",".join(photos))
                         # bot_vk.checking_start_message()
                         data_base_users.data_base_of_good_results[self.user_id].append({user_number['id']: photos})
 

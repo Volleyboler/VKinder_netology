@@ -43,7 +43,7 @@ class BotVK:
         return info_resp
 
     def creating_user_class(self, user_id):
-        current_user = user_settings.User(self.user_token, user_id)
+        current_user = user_settings.User(self.user_token, user_id, self)
         current_user.set_options_from_profile()
         return current_user
 
