@@ -61,7 +61,6 @@ class User:
         try:
             birth_date = result_response['response'][0]['bdate']
             birth_date_list = [int(x) for x in birth_date.split('.')]
-
             if len(birth_date_list) < 3:
                 raise
             else:
@@ -73,27 +72,29 @@ class User:
         except ValueError:
             empty_info_list.append("год рождения(Для использования сервиса необходим возраст 18+)")
         except KeyError:
-            empty_info_list.append("год рождения")
+            empty_info_list.append(1)
         try:
             self.sex = result_response['response'][0]['sex']
         except KeyError:
-            empty_info_list.append("пол")
+            empty_info_list.append(2)
         try:
             self.city = result_response['response'][0]['city']
         except KeyError:
-            empty_info_list.append("город")
+            empty_info_list.append(3)
         try:
             self.relation = result_response['response'][0]['relation']
         except KeyError:
-            empty_info_list.append("статус отношений")
+            empty_info_list.append(4)
 
         print(self.age)
         print(self.sex)
         print(self.city)
         print(self.relation)
+        empty_info_string_list = [dictionaries_vk.parameters_dict[x] for x in empty_info_list]
         if len(empty_info_list) > 0:
-            message_user_info = f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_list)}.\n1 - Внести недостающую информацию в чате\n2 - Завершить поиск"
+            message_user_info = f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_string_list)}.\n1 - Внести недостающую информацию в чате\n2 - Завершить поиск"
+
         else:
             message_user_info = f"Информация вашего профиля:\nВозраст: {self.age}\nпол: {dictionaries_vk.sex_dict[self.sex]}\nгород: {self.city['title']}\nсемейное положение: {dictionaries_vk.relations_dict[self.sex][self.relation]}."
         print(message_user_info)
-        self.bot_instance.write_msg(self.id, message_user_info)
+        return message_user_info, empty_info_list

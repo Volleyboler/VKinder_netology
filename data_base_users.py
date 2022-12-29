@@ -17,7 +17,6 @@ def create_db():
 # db = 'postgresql://{}:{}@localhost:5432/VKinter'.format(os.getenv('DB_USER'), os.getenv('DB_PASSWORD'))
 # engine = create_engine(db)
 
-
 def create_database():
     create_db()
 
