@@ -1,22 +1,19 @@
 import datetime
-
 import requests
 
-import bot_vk
-import private_token
 import dictionaries_vk
 
 
 class User:
 
-    def __init__(self, token, user_id, bot_instance):
+    def __init__(self, user_token, user_id):
         """
         Дата рождения,
         пол,
         город,
         семейное положение.
         """
-        self.token = token
+        self.token = user_token
         self.age = ''
         self.sex = -1
         self.city = {}
@@ -24,7 +21,6 @@ class User:
         self.id = user_id
         self.first_name = ''
         self.last_name = ''
-        self.bot_instance = bot_instance
 
     def get_profile_info(self):
         """ Функция для получения информации искомого пользователя """

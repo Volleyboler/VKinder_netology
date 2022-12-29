@@ -1,20 +1,17 @@
 import requests
 import time
 
-import bot_vk
 import data_base_users
-import private_token
 
 
 class UsersSearch:
-    def __init__(self, token: str, user_id: int, age: int, sex: int, city: dict, relation: int, bot_instance):
-        self.token = token
+    def __init__(self, user_token: str, user_id: int, age: int, sex: int, city: dict, relation: int):
+        self.token = user_token
         self.age = age
         self.sex = sex
         self.city = city
         self.relation = relation
         self.user_id = user_id
-        self.bot_instance = bot_instance
 
     def get_search_results(self, offset=0):
         """
@@ -23,6 +20,7 @@ class UsersSearch:
         :return: объект результат запроса
         """
         params = self._calculating_search_parameters()
+        print(params)
         info_resp = requests.get(
             'https://api.vk.com/method/users.search',
             params={
@@ -35,7 +33,7 @@ class UsersSearch:
                 'status': params['status'],
                 'count': 1000,
                 'offset': offset,
-                'fields': 'domain',
+                'fields': 'domain, bdate, city, sex'
             }
         )
         return info_resp
@@ -46,9 +44,9 @@ class UsersSearch:
         :return:
         """
         if self.age == 18:
-            age_from = self.age - 1
-        else:
             age_from = 18
+        else:
+            age_from = self.age - 1
         age_to = self.age + 1
         if self.sex == 1:
             sex = 2
@@ -83,11 +81,11 @@ class UsersSearch:
         :return:
         """
         param_offset = 0
-        counts = 1
-        while param_offset < counts:
+        count = 1
+        while param_offset < count:
             search_results = self.get_search_results(offset=param_offset,).json()
             print(search_results)
-            counts = search_results['response']['count']
+            count = search_results['response']['count']
             param_offset += 1000
             data_base_users.data_base_of_good_results[self.user_id] = []
             for user_number in search_results['response']['items']:

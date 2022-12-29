@@ -1,19 +1,30 @@
 import requests
 import random
 import datetime
+import sqlalchemy as sa
+from sqlalchemy import exc
 
 import bot_vk
 import private_token
 import users_search
-import data_base_users
+import data_base_users as db
 
 
 group_bot_vk = bot_vk.BotVK(private_token.USER_TOKEN, private_token.GROUP_TOKEN)
 current_users = group_bot_vk.checking_user_message()
 for user_id in current_users.keys():
     user = current_users[user_id]
-    new_users_search = users_search.UsersSearch(private_token.USER_TOKEN, user_id, user.age, user.sex,
-                                                user.city, user.relation, group_bot_vk)
-    new_users_search.searching_users()
-print(data_base_users.data_base_of_good_results)
-print(len(data_base_users.data_base_of_good_results[17668361]))
+    vk_user = db.VKUser(user_id, user.first_name, user.last_name, user.age, user.sex, user.city)
+    session = db.Session()
+    try:
+        session.add(vk_user)
+        session.commit()
+    except exc.IntegrityError:
+        print('User already in BD')
+    group_bot_vk.searching_users(user_id, user)
+
+    # new_users_search = users_search.UsersSearch(private_token.USER_TOKEN, user_id, user.age, user.sex,
+    #                                             user.city, user.relation, group_bot_vk)
+#     new_users_search.searching_users()
+# print(data_base_users.data_base_of_good_results)
+# print(len(data_base_users.data_base_of_good_results[17668361]))

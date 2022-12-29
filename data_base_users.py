@@ -49,11 +49,13 @@ class DatingUser(Base):
     birthdate = sa.Column(sa.String(30))
     sex = sa.Column(sa.Integer)
     city = sa.Column(sa.String(30))
+    city_id = sa.Column(sa.Integer)
     best_photos = sa.Column(sa.String(100))
+    user_domain = sa.Column(sa.String(100))
     user_id = sa.Column(sa.Integer, sa.ForeignKey('vk_user.vk_id'))
 
     def __init__(self, vk_id: int, dating_user_first_name: str, dating_user_last_name: str, birthdate: str, sex: int,
-                 city: dict):
+                 city: dict, user_domain: str, user_id: int):
         self.vk_id = vk_id
         self.dating_user_first_name = dating_user_first_name
         self.dating_user_last_name = dating_user_last_name
@@ -61,6 +63,8 @@ class DatingUser(Base):
         self.sex = sex
         self.city = city['title']
         self.city_id = city['id']
+        self.user_domain = user_domain
+        self.user_id = user_id
 
 class BlackList(Base):
     __tablename__ = 'blacklist'
@@ -70,11 +74,13 @@ class BlackList(Base):
     birthdate = sa.Column(sa.String(30))
     sex = sa.Column(sa.Integer)
     city = sa.Column(sa.String(30))
+    city_id = sa.Column(sa.Integer)
     best_photos = sa.Column(sa.String(100))
+    user_domain = sa.Column(sa.String(100))
     user_id = sa.Column(sa.Integer, sa.ForeignKey('vk_user.vk_id'))
 
     def __init__(self, vk_id: int, black_list_user_first_name: str, black_list_user_last_name: str, birthdate: str,
-                 sex: int, city: dict):
+                 sex: int, city: dict, user_domain: str, user_id: int):
         self.vk_id = vk_id
         self.black_list_user_first_name = black_list_user_first_name
         self.black_list_user_last_name = black_list_user_last_name
@@ -82,6 +88,8 @@ class BlackList(Base):
         self.sex = sex
         self.city = city['title']
         self.city_id = city['id']
+        self.user_domain = user_domain
+        self.user_id = user_id
 
 # class Photos(Base):
 #     __tablename__ = 'photos'
