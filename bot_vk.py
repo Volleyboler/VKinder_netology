@@ -1,7 +1,6 @@
 import random
 import requests
 import time
-from sqlalchemy import exc
 
 import dictionaries_vk
 import user_settings
@@ -26,7 +25,6 @@ class BotVK:
                 'user_id': user_id,
                 'message': message,
                 'attachment': attachment,
-                #                 'keyboard': {}
             }
         )
         return info_resp
@@ -36,6 +34,14 @@ class BotVK:
         self.write_msg(user_id, message=message, attachment=attachment)
         while True:
             self.write_msg(user_id, message=q_message)
+            user_answer = self.checking_user_message(user_id=user_id)
+            if user_answer in answers_list:
+                return user_answer
+            self.write_msg(user_id, message='Неверная команда')
+
+    def get_info_from_user(self, user_id=False, message='empty message', answers_list=[]):
+        while True:
+            self.write_msg(user_id, message=message)
             user_answer = self.checking_user_message(user_id=user_id)
             if user_answer in answers_list:
                 return user_answer
@@ -57,18 +63,29 @@ class BotVK:
         current_user = user_settings.User(self.user_token, user_id)
         message_user_info, empty_info_list = current_user.set_options_from_profile()
         if len(empty_info_list) > 0:
+            self.write_msg(user_id=user_id, message=message_user_info)
             for parameter in empty_info_list:
                 while True:
-                    user_answer = self.asking_question_get_answer_from_user(user_id=user_id, message=message_user_info)
-
                     if parameter == 1:
-                        ...
+                        age = self.get_info_from_user(user_id=user_id,
+                                                      message=dictionaries_vk.options_messages['enter_age'],
+                                                      answers_list=[x for x in range(18, 100)])
+                        current_user.age = age
                     elif parameter == 2:
-                        ...
+                        sex = self.get_info_from_user(user_id=user_id,
+                                                      message=dictionaries_vk.options_messages['enter_age'],
+                                                      answers_list=[x for x in range(1, 3)])
+                        current_user.sex = sex
                     elif parameter == 3:
-                        ...
+                        self.write_msg(user_id=user_id,
+                                       message='Для корректной работы поиска укажите город проживания в профиле')
+                        # city = self.get_info_from_user(user_id=user_id, message=dictionaries_vk.options_messages['enter_age'], answers_list=[x for x in range(18, 100)])
+                        # возможна доработка с использованием списка городов в API через проверку названия города
                     elif parameter == 4:
-                        ...
+                        relation = self.get_info_from_user(user_id=user_id,
+                                                           message=dictionaries_vk.options_messages['enter_age'],
+                                                           answers_list=[x for x in range(9)])
+                        current_user.relation = relation
         return current_user
 
     def searching_users(self, user_id, user_instance):
@@ -82,47 +99,57 @@ class BotVK:
                                                     user_instance.city, user_instance.relation)
         param_offset = 0
         count = 1
-        session = db.Session()
+
         while param_offset < count:
             search_results = new_users_search.get_search_results(offset=param_offset, ).json()
             print(search_results)
             count = search_results['response']['count']
             param_offset += 1000
             for user_number in search_results['response']['items']:
+                session = db.Session()
                 time.sleep(0.2)
                 photos_info = new_users_search.get_user_photos(user_number['id']).json()
                 if 'response' in photos_info.keys():
                     photos = new_users_search.get_best_photos(photos_info)
-                    if photos:
+                    if not photos:
+                        continue
+
+                    try:
                         message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\n{user_number['bdate']}\n{user_number['city']['title']}\nhttps://vk.com/{user_number['domain']}"
-                        # ПРОВЕРИТЬ НАЛИЧИЕ ПОЛЬЗОВАТЕЛЯ В БД
-                        user_answer = self.asking_question_get_answer_from_user(user_id=user_id, message=message_about_profile, q_message=dictionaries_vk.options_messages['check_search'], attachment=",".join(photos), answers_list=['1', '2', '3', '4'])
-                        if user_answer == '1':
-                            dating_user = db.DatingUser(user_number['id'], user_number['first_name'],
-                                                        user_number['last_name'], user_number['bdate'],
-                                                        user_number['sex'], user_number['city'], user_number['domain'],
-                                                        user_id)
-                            try:
-                                session.add(dating_user)
-                                session.commit()
-                            except exc.IntegrityError:
-                                print('User already in BD')
-                            print('пользователь добавлен в избранное')
-                        elif user_answer == '2':
-                            black_list_item = db.BlackList(user_number['id'], user_number['first_name'],
-                                                        user_number['last_name'], user_number['bdate'],
-                                                        user_number['sex'], user_number['city'], user_number['domain'],
-                                                        user_id)
-                            try:
-                                session.add(black_list_item)
-                                session.commit()
-                            except exc.IntegrityError:
-                                print('User already in BD')
-                            print('пользователь добавлен в чс')
-                        elif user_answer == '3':
-                            continue
-                        elif user_answer == '4':
-                            return False
+                    except KeyError:
+                        print(user_number)
+                        continue
+
+                    q_dating = session.query(db.DatingUser).filter(db.DatingUser.vk_id == user_number['id'],
+                                                                   db.BlackList.user_id == user_id)
+                    q_black_list = session.query(db.BlackList).filter(db.BlackList.vk_id == user_number['id'],
+                                                                      db.BlackList.user_id == user_id)
+                    if session.query(q_dating.exists()).scalar() or session.query(q_black_list.exists()).scalar():
+                        continue
+                    photos_attachment = ",".join(photos)
+                    user_answer = self.asking_question_get_answer_from_user(user_id=user_id,
+                                                                            message=message_about_profile,
+                                                                            q_message=dictionaries_vk.options_messages[
+                                                                                'check_search'],
+                                                                            attachment=photos_attachment,
+                                                                            answers_list=['1', '2', '3', '4'])
+                    if user_answer == '1':
+                        dating_user = db.DatingUser(user_number['id'], user_number['first_name'],
+                                                    user_number['last_name'], user_number['bdate'],
+                                                    user_number['sex'], user_number['city'], photos_attachment,
+                                                    user_number['domain'], user_id)
+                        session.add(dating_user)
+                    elif user_answer == '2':
+                        black_list_item = db.BlackList(user_number['id'], user_number['first_name'],
+                                                       user_number['last_name'], user_number['bdate'],
+                                                       user_number['sex'], user_number['city'],
+                                                       photos_attachment, user_number['domain'], user_id)
+                        session.add(black_list_item)
+                    elif user_answer == '3':
+                        continue
+                    elif user_answer == '4':
+                        return False
+                    session.commit()
         return True
 
     def checking_user_message(self, user_id=False):

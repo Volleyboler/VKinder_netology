@@ -14,8 +14,6 @@ Base = declarative_base()
 def create_db():
     Base.metadata.create_all(engine)
 
-# db = 'postgresql://{}:{}@localhost:5432/VKinter'.format(os.getenv('DB_USER'), os.getenv('DB_PASSWORD'))
-# engine = create_engine(db)
 
 def create_database():
     create_db()
@@ -55,7 +53,7 @@ class DatingUser(Base):
     user_id = sa.Column(sa.Integer, sa.ForeignKey('vk_user.vk_id'))
 
     def __init__(self, vk_id: int, dating_user_first_name: str, dating_user_last_name: str, birthdate: str, sex: int,
-                 city: dict, user_domain: str, user_id: int):
+                 city: dict, best_photos: str, user_domain: str, user_id: int):
         self.vk_id = vk_id
         self.dating_user_first_name = dating_user_first_name
         self.dating_user_last_name = dating_user_last_name
@@ -63,6 +61,7 @@ class DatingUser(Base):
         self.sex = sex
         self.city = city['title']
         self.city_id = city['id']
+        self.best_photos = best_photos
         self.user_domain = user_domain
         self.user_id = user_id
 
@@ -80,7 +79,7 @@ class BlackList(Base):
     user_id = sa.Column(sa.Integer, sa.ForeignKey('vk_user.vk_id'))
 
     def __init__(self, vk_id: int, black_list_user_first_name: str, black_list_user_last_name: str, birthdate: str,
-                 sex: int, city: dict, user_domain: str, user_id: int):
+                 sex: int, city: dict, best_photos: str, user_domain: str, user_id: int):
         self.vk_id = vk_id
         self.black_list_user_first_name = black_list_user_first_name
         self.black_list_user_last_name = black_list_user_last_name
@@ -88,18 +87,9 @@ class BlackList(Base):
         self.sex = sex
         self.city = city['title']
         self.city_id = city['id']
+        self.best_photos = best_photos
         self.user_domain = user_domain
         self.user_id = user_id
 
-# class Photos(Base):
-#     __tablename__ = 'photos'
-#     photo_link = sa.Column(sa.String, primary_key=True)
-#     likes = sa.Column(sa.Integer)
-#     vk_id_dating_user = sa.Column(sa.Integer, sa.ForeignKey('dating_user.vk_id'))
-
 
 Base.metadata.create_all(engine)
-
-
-data_base_of_good_results = {}
-data_base_of_black_list = {}

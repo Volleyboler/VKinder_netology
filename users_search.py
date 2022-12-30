@@ -1,7 +1,4 @@
 import requests
-import time
-
-import data_base_users
 
 
 class UsersSearch:
@@ -75,31 +72,31 @@ class UsersSearch:
         else:
             return False
 
-    def searching_users(self):
-        """
-
-        :return:
-        """
-        param_offset = 0
-        count = 1
-        while param_offset < count:
-            search_results = self.get_search_results(offset=param_offset,).json()
-            print(search_results)
-            count = search_results['response']['count']
-            param_offset += 1000
-            data_base_users.data_base_of_good_results[self.user_id] = []
-            for user_number in search_results['response']['items']:
-                time.sleep(0.2)
-                photos_info = self.get_user_photos(user_number['id']).json()
-                if 'response' in photos_info.keys():
-                    photos = self.get_best_photos(photos_info)
-                    if photos:
-                        message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\nhttps://vk" \
-                                                f".com/{user_number['domain']} "
-                        self.bot_instance.write_msg(self.user_id, message=message_about_profile,
-                                                    attachment=",".join(photos))
-                        # bot_vk.checking_start_message()
-                        data_base_users.data_base_of_good_results[self.user_id].append({user_number['id']: photos})
+    # def searching_users(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     param_offset = 0
+    #     count = 1
+    #     while param_offset < count:
+    #         search_results = self.get_search_results(offset=param_offset,).json()
+    #         print(search_results)
+    #         count = search_results['response']['count']
+    #         param_offset += 1000
+    #         data_base_users.data_base_of_good_results[self.user_id] = []
+    #         for user_number in search_results['response']['items']:
+    #             time.sleep(0.2)
+    #             photos_info = self.get_user_photos(user_number['id']).json()
+    #             if 'response' in photos_info.keys():
+    #                 photos = self.get_best_photos(photos_info)
+    #                 if photos:
+    #                     message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\nhttps://vk" \
+    #                                             f".com/{user_number['domain']} "
+    #                     self.bot_instance.write_msg(self.user_id, message=message_about_profile,
+    #                                                 attachment=",".join(photos))
+    #
+    #                     data_base_users.data_base_of_good_results[self.user_id].append({user_number['id']: photos})
 
     def get_user_photos(self, owner_id):
         """

@@ -81,16 +81,10 @@ class User:
             self.relation = result_response['response'][0]['relation']
         except KeyError:
             empty_info_list.append(4)
-
-        print(self.age)
-        print(self.sex)
-        print(self.city)
-        print(self.relation)
         empty_info_string_list = [dictionaries_vk.parameters_dict[x] for x in empty_info_list]
         if len(empty_info_list) > 0:
             message_user_info = f"Для корректной работы поиска необходимо заполнить следующие поля в вашем профиле:\n {', '.join(empty_info_string_list)}.\n1 - Внести недостающую информацию в чате\n2 - Завершить поиск"
 
         else:
             message_user_info = f"Информация вашего профиля:\nВозраст: {self.age}\nпол: {dictionaries_vk.sex_dict[self.sex]}\nгород: {self.city['title']}\nсемейное положение: {dictionaries_vk.relations_dict[self.sex][self.relation]}."
-        print(message_user_info)
         return message_user_info, empty_info_list
