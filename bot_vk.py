@@ -54,41 +54,53 @@ class BotVK:
             params={
                 'access_token': token,
                 'v': 5.131,
-
             }
         )
         return info_resp
 
     def creating_user_class(self, user_id):
+        """
+        Метод создает экземпляр класса User, заполняет атрибуты класса из профиля пользователя,
+        в случае отсутствия информации в профиле делает запрос через чат
+        :param user_id:
+        :return:
+        """
         current_user = user_settings.User(self.user_token, user_id)
         message_user_info, empty_info_list = current_user.set_options_from_profile()
         if len(empty_info_list) > 0:
+            answer = self.asking_question_get_answer_from_user(user_id=user_id, message=message_user_info,
+                                                               q_message=dictionaries_vk.options_messages[
+                                                                   'adding_attributes'], answers_list=['1', '2'])
+            if answer == '2':
+                return False
+            else:
+                for parameter in empty_info_list:
+                    while len(empty_info_list) > 0:
+                        if parameter == 1:
+                            age = self.get_info_from_user(user_id=user_id,
+                                                          message=dictionaries_vk.options_messages['enter_age'],
+                                                          answers_list=[str(x) for x in range(18, 100)])
+                            current_user.age = int(age)
+                            empty_info_list.remove(1)
+                        elif parameter == 2:
+                            sex = self.get_info_from_user(user_id=user_id,
+                                                          message=dictionaries_vk.options_messages['enter_age'],
+                                                          answers_list=[str(x) for x in range(1, 3)])
+                            current_user.sex = int(sex)
+                            empty_info_list.remove(2)
+                        elif parameter == 3:
+                            self.write_msg(user_id=user_id,
+                                           message='Невозможно добавить город через чат\nДля корректной работы поиска укажите город проживания в профиле')
+                            # city = self.get_info_from_user(user_id=user_id, message=dictionaries_vk.options_messages['enter_age'], answers_list=[x for x in range(18, 100)])
+                            # возможна доработка с использованием списка городов в API через проверку названия города
+                        elif parameter == 4:
+                            relation = self.get_info_from_user(user_id=user_id,
+                                                               message=dictionaries_vk.options_messages['enter_age'],
+                                                               answers_list=[str(x) for x in range(9)])
+                            current_user.relation = int(relation)
+                            empty_info_list.remove(4)
+        else:
             self.write_msg(user_id=user_id, message=message_user_info)
-            for parameter in empty_info_list:
-                while len(empty_info_list) > 0:
-                    if parameter == 1:
-                        age = self.get_info_from_user(user_id=user_id,
-                                                      message=dictionaries_vk.options_messages['enter_age'],
-                                                      answers_list=[str(x) for x in range(18, 100)])
-                        current_user.age = int(age)
-                        empty_info_list.remove(1)
-                    elif parameter == 2:
-                        sex = self.get_info_from_user(user_id=user_id,
-                                                      message=dictionaries_vk.options_messages['enter_age'],
-                                                      answers_list=[str(x) for x in range(1, 3)])
-                        current_user.sex = int(sex)
-                        empty_info_list.remove(2)
-                    elif parameter == 3:
-                        self.write_msg(user_id=user_id,
-                                       message='Невозможно добавить город через чат\nДля корректной работы поиска укажите город проживания в профиле')
-                        # city = self.get_info_from_user(user_id=user_id, message=dictionaries_vk.options_messages['enter_age'], answers_list=[x for x in range(18, 100)])
-                        # возможна доработка с использованием списка городов в API через проверку названия города
-                    elif parameter == 4:
-                        relation = self.get_info_from_user(user_id=user_id,
-                                                           message=dictionaries_vk.options_messages['enter_age'],
-                                                           answers_list=[str(x) for x in range(9)])
-                        current_user.relation = int(relation)
-                        empty_info_list.remove(4)
         return current_user
 
     def searching_users(self, user_id, user_instance):
@@ -116,18 +128,18 @@ class BotVK:
                     photos = new_users_search.get_best_photos(photos_info)
                     if not photos:
                         continue
-
                     try:
                         message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\n{user_number['bdate']}\n{user_number['city']['title']}\nhttps://vk.com/{user_number['domain']}"
                     except KeyError:
                         print(user_number)
                         continue
-
                     q_dating = session.query(db.DatingUser).filter(db.DatingUser.vk_id == user_number['id'],
                                                                    db.BlackList.user_id == user_id)
                     q_black_list = session.query(db.BlackList).filter(db.BlackList.vk_id == user_number['id'],
                                                                       db.BlackList.user_id == user_id)
-                    if session.query(q_dating.exists()).scalar() or session.query(q_black_list.exists()).scalar():
+                    if session.query(q_dating.exists()).scalar():
+                        continue
+                    if session.query(q_black_list.exists()).scalar():
                         continue
                     photos_attachment = ",".join(photos)
                     user_answer = self.asking_question_get_answer_from_user(user_id=user_id,
@@ -151,8 +163,10 @@ class BotVK:
                     elif user_answer == '3':
                         continue
                     elif user_answer == '4':
+                        self.write_msg(user_id=user_id, message=dictionaries_vk.options_messages['users_end_search'])
                         return False
                     session.commit()
+        self.write_msg(user_id=user_id, message=dictionaries_vk.options_messages['end_search_list'])
         return True
 
     def checking_user_message(self, user_id=False):
@@ -172,6 +186,8 @@ class BotVK:
                                 user_id = current_conversations_json['response']['items'][i]['conversation']['peer'][
                                     'id']
                                 current_user = self.creating_user_class(user_id)
+                                if not current_user:
+                                    continue
                                 active_users[user_id] = current_user
 
                 if len(active_users) > 0:
