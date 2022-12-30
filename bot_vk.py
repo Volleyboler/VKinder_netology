@@ -117,7 +117,6 @@ class BotVK:
 
         while param_offset < count:
             search_results = new_users_search.get_search_results(offset=param_offset, ).json()
-            print(search_results)
             count = search_results['response']['count']
             param_offset += 1000
             for user_number in search_results['response']['items']:

@@ -17,7 +17,6 @@ class UsersSearch:
         :return: объект результат запроса
         """
         params = self._calculating_search_parameters()
-        print(params)
         info_resp = requests.get(
             'https://api.vk.com/method/users.search',
             params={

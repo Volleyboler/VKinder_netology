@@ -45,7 +45,6 @@ class User:
     def set_options_from_profile(self):
         result_response = self.get_profile_info().json()
         empty_info_list = []
-        print(result_response)
         try:
             self.first_name = result_response['response'][0]['first_name']
         except KeyError:
