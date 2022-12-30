@@ -65,6 +65,7 @@ class DatingUser(Base):
         self.user_domain = user_domain
         self.user_id = user_id
 
+
 class BlackList(Base):
     __tablename__ = 'blacklist'
     vk_id = sa.Column(sa.Integer, primary_key=True)
