@@ -65,27 +65,30 @@ class BotVK:
         if len(empty_info_list) > 0:
             self.write_msg(user_id=user_id, message=message_user_info)
             for parameter in empty_info_list:
-                while True:
+                while len(empty_info_list) > 0:
                     if parameter == 1:
                         age = self.get_info_from_user(user_id=user_id,
                                                       message=dictionaries_vk.options_messages['enter_age'],
-                                                      answers_list=[x for x in range(18, 100)])
-                        current_user.age = age
+                                                      answers_list=[str(x) for x in range(18, 100)])
+                        current_user.age = int(age)
+                        empty_info_list.remove(1)
                     elif parameter == 2:
                         sex = self.get_info_from_user(user_id=user_id,
                                                       message=dictionaries_vk.options_messages['enter_age'],
-                                                      answers_list=[x for x in range(1, 3)])
-                        current_user.sex = sex
+                                                      answers_list=[str(x) for x in range(1, 3)])
+                        current_user.sex = int(sex)
+                        empty_info_list.remove(2)
                     elif parameter == 3:
                         self.write_msg(user_id=user_id,
-                                       message='Для корректной работы поиска укажите город проживания в профиле')
+                                       message='Невозможно добавить город через чат\nДля корректной работы поиска укажите город проживания в профиле')
                         # city = self.get_info_from_user(user_id=user_id, message=dictionaries_vk.options_messages['enter_age'], answers_list=[x for x in range(18, 100)])
                         # возможна доработка с использованием списка городов в API через проверку названия города
                     elif parameter == 4:
                         relation = self.get_info_from_user(user_id=user_id,
                                                            message=dictionaries_vk.options_messages['enter_age'],
-                                                           answers_list=[x for x in range(9)])
-                        current_user.relation = relation
+                                                           answers_list=[str(x) for x in range(9)])
+                        current_user.relation = int(relation)
+                        empty_info_list.remove(4)
         return current_user
 
     def searching_users(self, user_id, user_instance):
