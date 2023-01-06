@@ -7,12 +7,6 @@ import dictionaries_vk
 class User:
 
     def __init__(self, user_token, user_id):
-        """
-        Дата рождения,
-        пол,
-        город,
-        семейное положение.
-        """
         self.token = user_token
         self.age = ''
         self.sex = -1
@@ -34,13 +28,6 @@ class User:
             }
         )
         return info_resp
-
-    def get_search_options(self):
-        """
-        Функция получения информации о пользователе через чат
-        :return:
-        """
-        ...
 
     def set_options_from_profile(self):
         result_response = self.get_profile_info().json()
