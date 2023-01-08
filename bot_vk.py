@@ -130,7 +130,7 @@ class BotVK:
                     try:
                         message_about_profile = f"{user_number['first_name']} {user_number['last_name']}\n{user_number['bdate']}\n{user_number['city']['title']}\nhttps://vk.com/{user_number['domain']}"
                     except KeyError:
-                        print(user_number)
+                        print(f"KeyError in user_number(searching_users){user_number}")
                         continue
                     q_dating = session.query(db.DatingUser).filter(db.DatingUser.vk_id == user_number['id'],
                                                                    db.BlackList.user_id == user_id)
@@ -177,30 +177,36 @@ class BotVK:
             active_users = {}
             while True:
                 current_conversations_json = self.get_conversations_with_users(self.group_token).json()
-                for i in range(current_conversations_json['response']['count']):
-                    if 'unread_count' in current_conversations_json['response']['items'][i]['conversation'].keys():
-                        if current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1:
-                            user_message = current_conversations_json['response']['items'][i]['last_message']['text']
-                            if str(user_message).lower() == 'начать':
-                                user_id = current_conversations_json['response']['items'][i]['conversation']['peer'][
-                                    'id']
-                                current_user = self.creating_user_class(user_id)
-                                if not current_user:
-                                    continue
-                                active_users[user_id] = current_user
+                try:
+                    for i in range(current_conversations_json['response']['count']):
+                        if 'unread_count' in current_conversations_json['response']['items'][i]['conversation'].keys():
+                            if current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1:
+                                user_message = current_conversations_json['response']['items'][i]['last_message']['text']
+                                if str(user_message).lower() == 'начать':
+                                    user_id = current_conversations_json['response']['items'][i]['conversation']['peer'][
+                                        'id']
+                                    current_user = self.creating_user_class(user_id)
+                                    if not current_user:
+                                        continue
+                                    active_users[user_id] = current_user
 
-                if len(active_users) > 0:
-                    print(active_users)
-                    return active_users
+                    if len(active_users) > 0:
+                        print(active_users)
+                        return active_users
+                except KeyError:
+                    print(current_conversations_json)
         else:
             while True:
                 current_conversations_json = self.get_conversations_with_users(self.group_token).json()
-                for i in range(current_conversations_json['response']['count']):
-                    if current_conversations_json['response']['items'][i]['conversation']['peer']['id'] == user_id:
-                        if 'unread_count' in current_conversations_json['response']['items'][i]['conversation'].keys():
-                            if current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1:
-                                user_message = current_conversations_json['response']['items'][i]['last_message'][
-                                    'text']
-                                return str(user_message).lower()
-                    else:
-                        continue
+                try:
+                    for i in range(current_conversations_json['response']['count']):
+                        if current_conversations_json['response']['items'][i]['conversation']['peer']['id'] == user_id:
+                            if 'unread_count' in current_conversations_json['response']['items'][i]['conversation'].keys():
+                                if current_conversations_json['response']['items'][i]['conversation']['unread_count'] >= 1:
+                                    user_message = current_conversations_json['response']['items'][i]['last_message'][
+                                        'text']
+                                    return str(user_message).lower()
+                        else:
+                            continue
+                except KeyError:
+                    print(current_conversations_json)
