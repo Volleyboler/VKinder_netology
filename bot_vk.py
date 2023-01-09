@@ -84,7 +84,7 @@ class BotVK:
                             empty_info_list.remove(1)
                         elif parameter == 2:
                             sex = self.get_info_from_user(user_id=user_id,
-                                                          message=dictionaries_vk.options_messages['enter_age'],
+                                                          message=dictionaries_vk.options_messages['enter_sex'],
                                                           answers_list=[str(x) for x in range(1, 3)])
                             current_user.sex = int(sex)
                             empty_info_list.remove(2)
@@ -95,7 +95,7 @@ class BotVK:
                             # возможна доработка с использованием списка городов в API через проверку названия города
                         elif parameter == 4:
                             relation = self.get_info_from_user(user_id=user_id,
-                                                               message=dictionaries_vk.options_messages['enter_age'],
+                                                               message=dictionaries_vk.options_messages['enter_relation'],
                                                                answers_list=[str(x) for x in range(9)])
                             current_user.relation = int(relation)
                             empty_info_list.remove(4)
