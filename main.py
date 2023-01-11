@@ -1,4 +1,5 @@
 from sqlalchemy import exc
+import sqlalchemy as sa
 
 import bot_vk
 import private_token
@@ -18,6 +19,28 @@ current_users = {} ввел на будущее, чтобы попробоват
 """
 
 
+def get_dating_users(user_id):
+    session = db.Session()
+    query = session.query(db.DatingUser).filter(sa.or_(
+        db.DatingUser.user_id == user_id)).all()
+    return query
+    # for user in q:
+    #     message_about_profile = f"{user.dating_user_first_name} {user.dating_user_last_name}\n{user.birthdate}\n{user.city}\nhttps://vk.com/{user.user_domain}"
+    #     attachments_photo = user.best_photos
+    #     # print(message_about_profile, attachments_photo)
+    # questions = sa.Table('dating_user', db.Base.metadata,
+    #                   sa.Column(id, ...),
+    #                   sa.Column(user_id, ...),
+    #                   ....)
+    # print(session.query('dating_user').all()) # .filter(db.DatingUser.c.user_id == user_id)
+    # q = session.query(db.DatingUser).filter(sa.or_(
+    #     db.DatingUser.user_id == 'user_id',
+    # )).all()
+    # q = session.query(db.DatingUser).filter(sa.or_(
+    #     db.DatingUser.user_id == user_id)).all()
+    # print(q)
+
+
 def interaction_with_user(group_bot_vk, user, user_id):
     """
     Функция взаимодействия с пользователем
@@ -29,10 +52,17 @@ def interaction_with_user(group_bot_vk, user, user_id):
     while True:
         user_answer = group_bot_vk.get_info_from_user(user_id=user_id,
                                                       message=dictionaries_vk.options_messages['start'],
-                                                      answers_list=['1', '2'])
+                                                      answers_list=['1', '2', '3'])
         if user_answer == '1':
             group_bot_vk.searching_users(user_id, user)
         elif user_answer == '2':
+            query = get_dating_users(user_id)
+            group_bot_vk.write_msg(user_id=user_id, message=f"Число записей в избранном: {len(query)}")
+            for user in query:
+                message_about_profile = f"{user.dating_user_first_name} {user.dating_user_last_name}\n{user.birthdate}\n{user.city}\nhttps://vk.com/{user.user_domain}"
+                attachments_photo = user.best_photos
+                group_bot_vk.write_msg(user_id=user_id, message=message_about_profile, attachment=attachments_photo)
+        elif user_answer == '3':
             group_bot_vk.write_msg(user_id=user_id, message=dictionaries_vk.options_messages['end_work'])
             return False
 
@@ -52,8 +82,8 @@ def main():
                 user = writing_users[user_id]
                 vk_user = db.VKUser(user_id, user.first_name, user.last_name, user.age, user.sex, user.city)
                 session = db.Session()
+                session.add(vk_user)
                 try:
-                    session.add(vk_user)
                     session.commit()
                 except exc.IntegrityError:
                     print('User already in BD')
