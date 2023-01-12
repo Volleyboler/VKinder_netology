@@ -49,7 +49,9 @@ def interaction_with_user(group_bot_vk, user, user_id):
             query = get_dating_users(user_id)
             group_bot_vk.write_msg(user_id=user_id, message=f"Число записей в избранном: {len(query)}")
             for dating_profile in query:
-                message_about_profile = f"{dating_profile.dating_user_first_name} {dating_profile.dating_user_last_name}\n{dating_profile.birthdate}\n{dating_profile.city}\nhttps://vk.com/{dating_profile.user_domain}"
+                message_about_profile = f"{dating_profile.dating_user_first_name} " \
+                                        f"{dating_profile.dating_user_last_name}\n{dating_profile.birthdate}" \
+                                        f"\n{dating_profile.city}\nhttps://vk.com/{dating_profile.user_domain}"
                 attachments_photo = dating_profile.best_photos
                 group_bot_vk.write_msg(user_id=user_id, message=message_about_profile, attachment=attachments_photo)
         elif user_answer == '3':
