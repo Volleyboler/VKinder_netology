@@ -20,25 +20,15 @@ current_users = {} ввел на будущее, чтобы попробоват
 
 
 def get_dating_users(user_id):
+    """
+    Функция получает список избранных профилей для выбранного пользователя
+    :param user_id:
+    :return:
+    """
     session = db.Session()
     query = session.query(db.DatingUser).filter(sa.or_(
         db.DatingUser.user_id == user_id)).all()
     return query
-    # for user in q:
-    #     message_about_profile = f"{user.dating_user_first_name} {user.dating_user_last_name}\n{user.birthdate}\n{user.city}\nhttps://vk.com/{user.user_domain}"
-    #     attachments_photo = user.best_photos
-    #     # print(message_about_profile, attachments_photo)
-    # questions = sa.Table('dating_user', db.Base.metadata,
-    #                   sa.Column(id, ...),
-    #                   sa.Column(user_id, ...),
-    #                   ....)
-    # print(session.query('dating_user').all()) # .filter(db.DatingUser.c.user_id == user_id)
-    # q = session.query(db.DatingUser).filter(sa.or_(
-    #     db.DatingUser.user_id == 'user_id',
-    # )).all()
-    # q = session.query(db.DatingUser).filter(sa.or_(
-    #     db.DatingUser.user_id == user_id)).all()
-    # print(q)
 
 
 def interaction_with_user(group_bot_vk, user, user_id):
@@ -58,9 +48,9 @@ def interaction_with_user(group_bot_vk, user, user_id):
         elif user_answer == '2':
             query = get_dating_users(user_id)
             group_bot_vk.write_msg(user_id=user_id, message=f"Число записей в избранном: {len(query)}")
-            for user in query:
-                message_about_profile = f"{user.dating_user_first_name} {user.dating_user_last_name}\n{user.birthdate}\n{user.city}\nhttps://vk.com/{user.user_domain}"
-                attachments_photo = user.best_photos
+            for dating_profile in query:
+                message_about_profile = f"{dating_profile.dating_user_first_name} {dating_profile.dating_user_last_name}\n{dating_profile.birthdate}\n{dating_profile.city}\nhttps://vk.com/{dating_profile.user_domain}"
+                attachments_photo = dating_profile.best_photos
                 group_bot_vk.write_msg(user_id=user_id, message=message_about_profile, attachment=attachments_photo)
         elif user_answer == '3':
             group_bot_vk.write_msg(user_id=user_id, message=dictionaries_vk.options_messages['end_work'])
